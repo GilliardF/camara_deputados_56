@@ -23,7 +23,6 @@ with sqlite3.connect(db_path) as conn:
         """, conn
     )
 
-
 # Sidebar Partido Eleitoral
 partido = sorted(lista_partidos["sigla"].unique().tolist())
 select_partido = st.sidebar.selectbox("Sigla - Partido Eleitoral", partido)
@@ -82,19 +81,16 @@ with st.container():
     with col2_tab1:
         st.metric("Total de Estados", partido_agrupado['siglaUf'].nunique())
 
-    fig1 = px.scatter_map(
+    fig1 = px.scatter_mapbox(
         partido_agrupado,
         lat="latitude",
         lon="longitude",
         size="total_deputados",
         color="total_deputados",
         zoom=3.4,
-        labels={
-            "siglaUf": "UF",
-            "total_deputados": "Total de Deputados"
-        },
+        labels={"siglaUf": "UF", "total_deputados": "Total de Deputados"},
         text="Info",
-        map_style="open-street-map",
+        mapbox_style="open-street-map",
         color_continuous_scale=px.colors.sequential.Sunset_r,
         center={"lat": -14.7017, "lon": -54.1253},
         hover_data={"latitude": False, "longitude": False, "Info": False, "total_deputados": False},

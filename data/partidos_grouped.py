@@ -6,13 +6,13 @@ def partidos_grouped(sigla_partido, db_path):
     query = """
         SELECT
             siglaUf,
-			COUNT(deputados_56.id) AS total_deputados
+            COUNT(id) AS total_deputados
         FROM
             deputados_56
         WHERE
             siglaPartido = ?
-		GROUP BY 
-			siglaUf;
+        GROUP BY
+            siglaUf;
     """
 
     with sqlite3.connect(db_path) as conn:

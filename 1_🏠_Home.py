@@ -16,13 +16,13 @@ st.sidebar.markdown(
 
 btn1 = st.button("Acesse o repositório no GitHub")
 if btn1:
-    webbrowser.open_new_tab("")
+    webbrowser.open_new_tab("https://github.com/GilliardF/camara_deputados_56")
 
 st.write(
-    """Este projeto busca coletar, armazenar e analisar dados públicos da Câmara dos Deputados 
-    para entender os padrões de gastos parlamentares. Utilizando Big Data, 
-    Business Intelligence (BI) e Machine Learning, serão gerados relatórios e visualizações interativas 
-    que ajudarão a identificar tendências e possíveis irregularidades. O objetivo é transformar dados brutos 
+    """Este projeto busca coletar, armazenar e analisar dados públicos da Câmara dos Deputados
+    para entender os padrões de gastos parlamentares. Utilizando Big Data,
+    Business Intelligence (BI) e Machine Learning, serão gerados relatórios e visualizações interativas
+    que ajudarão a identificar tendências e possíveis irregularidades. O objetivo é transformar dados brutos
     em informações valiosas, promovendo mais transparência e fiscalização dos recursos públicos.
     """
 )

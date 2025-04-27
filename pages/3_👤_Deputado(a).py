@@ -43,7 +43,6 @@ with sqlite3.connect(db_path) as conn:
         """, conn
     )
 
-
 # Sidebar Partido
 partido = sorted(lista_partidos["siglaPartido"].unique().tolist())
 select_partido = st.sidebar.selectbox("Sigla - Partido Eleitoral", partido)
@@ -69,11 +68,18 @@ deputado_despesas = despesas_deputado(int(id_deputado), db_path)
 
 row1 = st.columns(3)
 
-
 with st.container():
+    # Exibir a imagem do deputado
     row1[0].image(deputado_info['urlFoto'].values[-1], width=100)
-    row1[1].image(deputado_info['urlLogo'].values[-1], width=50)
 
+    # Verifica e exibe a logo do partido correspondente ao partido selecionado
+    # Obtém a logo do partido apenas se ela for correspondente ao partido selecionado
+    partido_logo_info = deputado_info.loc[deputado_info['siglaPartido'] == select_partido, 'urlLogo']
+
+    if not partido_logo_info.empty:
+        logo_url = partido_logo_info.values[0]
+        if pd.notna(logo_url) and logo_url.strip():
+            row1[1].image(logo_url, width=100)
 
 tab1, tab2, tab3 = st.tabs([
     "📔 Informações Gerais",
@@ -83,7 +89,7 @@ tab1, tab2, tab3 = st.tabs([
 
 # Função para formatar a data em dd/mm/aaaa e se for vazio retorna "Não informado"
 def formatar_data(data):
-    return data.strftime("%d/%m/%Y") if data else "Não informado"
+    return data.strftime("%d/%m/%Y") if not pd.isna(data) else "Não informado"
 
 data_nascimento = formatar_data(pd.to_datetime(deputado_info['dataNascimento'].values[-1]))
 data_falecimento = formatar_data(pd.to_datetime(deputado_info['dataFalecimento'].values[-1]))
@@ -106,36 +112,41 @@ with tab1:
         st.write(f"**Escolaridade**: {deputado_info['escolaridade'].values[-1]}")
         st.write(f"**Profissão**: {deputado_info['profissoes'].values[-1]}")
 
-        for redes_sociais in deputado_info['redeSocial'].values:
-            # Obtendo a lista de redes sociais a partir da string separada por '; '
-            lista_rede_social = redes_sociais.split('; ')
+        todas_redes_sociais = set()
 
-            # Exibindo as redes sociais com links clicáveis, um por vez
-            for each in lista_rede_social:
-                if "facebook" in each:
-                    st.write(f"**Facebook**: [{each}]({each})")
-                elif "twitter" in each:
-                    st.write(f"**Twitter**: [{each}]({each})")
-                elif "instagram" in each:
-                    st.write(f"**Instagram**: [{each}]({each})")
-                else:
-                    st.write(f"**Outros**: [{each}]({each})")
+        for redes_sociais in deputado_info['redeSocial'].values:
+            for rede in redes_sociais.split(';'):
+                rede_limpa = rede.strip()
+                if rede_limpa:
+                    todas_redes_sociais.add(rede_limpa)
+
+        for each in sorted(todas_redes_sociais):
+            if "facebook" in each:
+                st.write(f"**Facebook**: [{each}]({each})")
+            elif "twitter" in each:
+                st.write(f"**Twitter**: [{each}]({each})")
+            elif "instagram" in each:
+                st.write(f"**Instagram**: [{each}]({each})")
+            else:
+                st.write(f"**Outros**: [{each}]({each})")
 
     with col2_tab1:
         col2_1_tab1, col2_2_tab1 = st.columns([1, 1])
 
+        deputados_filtrados = lista_deputados[lista_deputados['nome'] == select_deputado]
+        partidos = deputados_filtrados['siglaPartido'].unique().tolist()
+        partidos = sorted(partidos)
+        partidos_str = ", ".join(partidos) if partidos else "Nenhum outro partido"
+
         with col2_1_tab1:
             # Total de partidos
-            st.metric(label="Total de partidos", value=deputado_info['siglaPartido'].nunique())
+            st.metric(label="Total de partidos", value=len(partidos))
 
         with col2_2_tab1:
-            # Lista de partidos presentes em d_56
-            partidos = deputado_info['siglaPartido'].unique().tolist()
-            partidos = sorted(partidos)
-            partidos_str = ", ".join(partidos)
-            st.metric(label="Partidos", value=partidos_str)
+            # Exibe a lista de partidos
+            st.metric(label="Partido(s) que participou durante 56° Legislatura", value=partidos_str)
 
-        st.markdown("**Histórico de Partidos em 2022:**")
+        st.markdown("**Histórico do(s) Partido(s) em 2022:**")
         deputado_historico['dataHora'] = pd.to_datetime(deputado_historico['dataHora'])
         deputado_historico['dataHora'] = deputado_historico['dataHora'].dt.strftime('%d/%m/%Y %H:%M')
 
@@ -153,18 +164,23 @@ with tab1:
 with tab2:
     col1_tab2, col2_tab2, col3_tab2 = st.columns([2, 2, 2])
 
-    with col1_tab2:        
+    with col1_tab2:
         total_despesas = deputado_despesas['valorDocumento'].sum()
         despesas_formatado = f"R$ {total_despesas:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
         st.metric("Total de despesas", despesas_formatado)
 
     with col2_tab2:
-        despesa_alta = deputado_despesas["valorDocumento"].max()
-        despesa_alta_formatada = f"R$ {despesa_alta:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-        st.metric("Despesa mais alta", despesa_alta_formatada)
+        # Verifica se 'deputado_despesas' não está vazio antes de procurar pela despesa mais alta
+        if not deputado_despesas.empty:
+            despesa_alta = deputado_despesas["valorDocumento"].max()
+            despesa_alta_formatada = f"R$ {despesa_alta:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+            st.metric("Despesa mais alta", despesa_alta_formatada)
+        else:
+            st.metric("Despesa mais alta", "Não disponível")
 
     with st.container():
-        fig1 = px.bar(
+        if not deputado_despesas.empty:
+            fig1 = px.bar(
                 deputado_despesas,
                 x="mes",
                 y="valorDocumento",
@@ -172,9 +188,10 @@ with tab2:
                 labels={"mes": "Mês", "valorDocumento": "Valor (R$)", "tipoDespesa": "Tipo de despesa"},
                 color="tipoDespesa"
             )
-
-        fig1.update_layout(barmode='stack')
-        st.plotly_chart(fig1)
+            fig1.update_layout(barmode='stack')
+            st.plotly_chart(fig1)
+        else:
+            st.write("Sem dados de despesas disponíveis para criar o gráfico")
 
     with st.container():
         col1_tab2_despesas, col2_tab2_fornecedores = st.columns([2, 2])
@@ -208,8 +225,7 @@ with tab2:
             else:
                 df_despesas = df_despesas[df_despesas["nomeFornecedor"].isin(fornecedores)]
 
-
-        # Formatando o todas_despesas["Valor - Documento"] para R$
+        # Formatando o df_despesas["valorDocumento"] para R$
         df_despesas["valorDocumento"] = df_despesas["valorDocumento"].apply(
             lambda x: f"R$ {x:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
         )
@@ -234,7 +250,7 @@ with tab2:
                 ),
                 "dataDocumento": st.column_config.DateColumn(
                     "Data - Despesa",
-                    format="DD/MM/YYYY"  
+                    format="DD/MM/YYYY"
                 ),
                 "valorDocumento": st.column_config.TextColumn(
                     "Valor - Documento"
@@ -261,31 +277,40 @@ with tab3:
     col1_tab3, col2_tab3 = st.columns([1, 2])
     with col1_tab3:
         # Total de fornecedores
-        total_fornecedores = deputado_despesas['nomeFornecedor'].nunique()
-        st.metric("Total de Fornecedores", total_fornecedores)
+        if not deputado_despesas.empty:
+            total_fornecedores = deputado_despesas['nomeFornecedor'].nunique()
+            st.metric("Total de Fornecedores", total_fornecedores)
+        else:
+            st.metric("Total de Fornecedores", "Não disponível")
 
         # Fornecedor com maior despesa
-        fornecedor_maior_despesa = deputado_despesas.groupby('nomeFornecedor')['valorDocumento'].sum().idxmax()
-        st.metric("Fornecedor com maior despesa", fornecedor_maior_despesa)
+        if not deputado_despesas.empty and not deputado_despesas['nomeFornecedor'].isna().all():
+            fornecedor_maior_despesa = deputado_despesas.groupby('nomeFornecedor')['valorDocumento'].sum().idxmax()
+            st.metric("Fornecedor com maior despesa", fornecedor_maior_despesa)
+        else:
+            st.metric("Fornecedor com maior despesa", "Não disponível")
 
     with col2_tab3:
-        # Total de despesas por fornecedor
-        total_despesas_fornecedor = deputado_despesas.groupby('nomeFornecedor')['valorDocumento'].sum().reset_index()
-        total_despesas_fornecedor = total_despesas_fornecedor.sort_values(by='valorDocumento', ascending=False)
-        total_despesas_fornecedor['valorDocumento'] = total_despesas_fornecedor['valorDocumento'].apply(
-            lambda x: f"R$ {x:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-        )
+        if not deputado_despesas.empty:
+            # Total de despesas por fornecedor
+            total_despesas_fornecedor = deputado_despesas.groupby('nomeFornecedor')['valorDocumento'].sum().reset_index()
+            total_despesas_fornecedor = total_despesas_fornecedor.sort_values(by='valorDocumento', ascending=False)
+            total_despesas_fornecedor['valorDocumento'] = total_despesas_fornecedor['valorDocumento'].apply(
+                lambda x: f"R$ {x:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+            )
 
-        st.dataframe(
-            total_despesas_fornecedor,
-            column_config={
-                "nomeFornecedor": st.column_config.TextColumn(
-                    "Nome - Fornecedor"
-                ),
-                "valorDocumento": st.column_config.TextColumn(
-                    "Valor - Documento"
-                )
-            },
-            hide_index=True,
-            width=1300
-        )
+            st.dataframe(
+                total_despesas_fornecedor,
+                column_config={
+                    "nomeFornecedor": st.column_config.TextColumn(
+                        "Nome - Fornecedor"
+                    ),
+                    "valorDocumento": st.column_config.TextColumn(
+                        "Valor - Documento"
+                    )
+                },
+                hide_index=True,
+                width=1300
+            )
+        else:
+            st.write("Sem dados de fornecedores disponíveis")
