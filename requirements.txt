@@ -2,7 +2,7 @@ streamlit==1.42.0
 numpy==2.2.3
 pandas==2.2.3
 requests==2.32.3
-plotly-express==^0.4.1
+plotly-express==0.4.1
 pysqlite3==0.5.4
 black==23.1.0
 isort==5.10.1
