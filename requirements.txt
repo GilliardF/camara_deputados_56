@@ -1,9 +1,8 @@
-python>=3.8,<3.12
-streamlit==1.22.0 # Ajuste para a versão mais recente estável
-numpy==1.23.3 # Ajustar conforme a versão mais estável disponível
-pandas==1.5.3 # Verifique a última versão estável e compatível
+streamlit==1.22.0  # Ajustada para a última versão estável disponível
+numpy==1.23.3      # Ajuste conforme a versão estável disponível
+pandas==1.5.3
 requests==2.28.1
-plotly==5.11.0 # plotly-express está incluído aqui
-black==23.1.0 # Revisado para uma versão estável
+plotly==5.11.0     # Use plotly, que inclui plotly-express
+black==23.1.0
 isort==5.10.1
 flake8==5.2.2
