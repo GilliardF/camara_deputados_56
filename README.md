@@ -38,7 +38,7 @@ Ative o ambiente virtual do Poetry:
 
     poetry shell
 
-Se necessário, criar um novo ambviente virtual e adicionar depedências pelo poetry (configuração manual):
+Se necessário, criar um novo ambiente virtual e adicionar depedências pelo poetry (configuração manual):
 
     poetry init
     poetry add
