@@ -15,12 +15,12 @@ if btn1:
 
 st.write(
     """
-    O projeto visa coletar, armazenar e analisar dados públicos referente ao
-    Exercício da Atividade Parlamentar da Câmara dos Deputados, utilizando
+    O projeto visa coletar, armazenar e analisar dados públicos referente aos
+    gastos de 2022 dos deputados da 56° legislatura, utilizando
     tecnologias de Big Data, Business Intelligence (BI) e Machine Learning
     para transformar informações brutas em insights valiosos.
 
-    Através de ferramentas do Streamlit, geraremos relatórios e visualizações
+    Através do Streamlit, geraremos relatórios e visualizações
     interativas que facilitam a compreensão dos padrões de gastos,
     enquanto algoritmos de Machine Learning, como a Análise de
     Componentes Principais (PCA), serão aplicados para a detecção
