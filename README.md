@@ -1,5 +1,5 @@
 
-# Análise de Despesas com PCA
+# Análise com PCA referente as despesas dos Deputados em 2022
 
 Análise de Despesas com PCA é um aplicativo desenvolvido em Python com Streamlit, projetado para facilitar a identificação de padrões e anomalias em dados financeiros de despesas públicas. A análise é feita por meio de Componentes Principais (PCA), proporcionando uma visualização de dados em uma interface interativa.
 
