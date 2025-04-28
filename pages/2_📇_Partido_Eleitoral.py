@@ -1,16 +1,14 @@
-from data.partidos_grouped import partidos_grouped
-from data.distribuicao_uf import distribuicao_uf
-import streamlit as st
-import plotly.express as px
-import pandas as pd
-import sqlite3
 import os
+import sqlite3
 
-st.set_page_config(
-    page_title="Partido Eleitoral",
-    layout="wide",
-    page_icon="📇"
-)
+import pandas as pd
+import plotly.express as px
+import streamlit as st
+
+from data.distribuicao_uf import distribuicao_uf
+from data.partidos_grouped import partidos_grouped
+
+st.set_page_config(page_title="Partido Eleitoral", layout="wide", page_icon="📇")
 
 db_path = os.path.abspath("data/data.db")
 
@@ -20,7 +18,8 @@ with sqlite3.connect(db_path) as conn:
         """
         SELECT sigla
         FROM partidos
-        """, conn
+        """,
+        conn,
     )
 
 # Sidebar Partido Eleitoral
@@ -58,13 +57,21 @@ uf_coordinates = {
     "SC": (-27.2423, -50.2189),
     "SP": (-23.5505, -46.6333),
     "SE": (-10.9472, -37.0731),
-    "TO": (-10.1833, -48.3333)
+    "TO": (-10.1833, -48.3333),
 }
 
 # Adicionando coordenadas ao DataFrame
-partido_agrupado["latitude"] = partido_agrupado["siglaUf"].map(lambda uf: uf_coordinates[uf][0])
-partido_agrupado["longitude"] = partido_agrupado["siglaUf"].map(lambda uf: uf_coordinates[uf][1])
-partido_agrupado["Info"] = partido_agrupado["siglaUf"] + " - " + partido_agrupado["total_deputados"].astype(str)
+partido_agrupado["latitude"] = partido_agrupado["siglaUf"].map(
+    lambda uf: uf_coordinates[uf][0]
+)
+partido_agrupado["longitude"] = partido_agrupado["siglaUf"].map(
+    lambda uf: uf_coordinates[uf][1]
+)
+partido_agrupado["Info"] = (
+    partido_agrupado["siglaUf"]
+    + " - "
+    + partido_agrupado["total_deputados"].astype(str)
+)
 
 st.title(f"{select_partido}")
 
@@ -79,7 +86,7 @@ with st.container():
         st.metric("Total de Deputados", total_deputados)
 
     with col2_tab1:
-        st.metric("Total de Estados", partido_agrupado['siglaUf'].nunique())
+        st.metric("Total de Estados", total_estados)
 
     fig1 = px.scatter_mapbox(
         partido_agrupado,
@@ -93,18 +100,21 @@ with st.container():
         mapbox_style="open-street-map",
         color_continuous_scale=px.colors.sequential.Sunset_r,
         center={"lat": -14.7017, "lon": -54.1253},
-        hover_data={"latitude": False, "longitude": False, "Info": False, "total_deputados": False},
+        hover_data={
+            "latitude": False,
+            "longitude": False,
+            "Info": False,
+            "total_deputados": False,
+        },
         width=700,
-        height=585
+        height=585,
     )
 
     fig1.update_traces(
         textfont=dict(size=12, color="black"),
-        textposition="top center"
+        textposition="top center",
     )
 
-    fig1.update_layout(
-        margin={"r": 0, "t": 0, "l": 0, "b": 0}
-    )
+    fig1.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
 
     st.plotly_chart(fig1, use_container_width=True)
