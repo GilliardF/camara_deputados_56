@@ -49,7 +49,7 @@ def SPE_limit(X_train_scaled, pca, alpha=0.95):
     limit = np.percentile(SPEs, 100 * alpha)
     return limit
 
-def parallel_analysis(X, n_iter=50, random_state=42, n_jobs=4):
+def parallel_analysis(X, n_iter=50, random_state=37, n_jobs=4):
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
     pca = PCA()
