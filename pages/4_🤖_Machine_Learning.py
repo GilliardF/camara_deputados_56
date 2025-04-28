@@ -188,8 +188,7 @@ try:
     # Análise Paralela
     with tab2:
         col1_tab2, col2_tab2 = st.columns(2)
-        st.header("Análise Paralela")
-        st.subheader("Parallel Analysis (Quantos componentes principais reter?)")
+        st.header("Parallel Analysis (Quantos componentes principais reter?)")
 
         with st.spinner('Executando análise paralela...'):
             X_features = df[numeric_cols].dropna().values
