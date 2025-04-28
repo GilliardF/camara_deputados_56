@@ -88,7 +88,7 @@ def pca_anomaly_detection(df, numeric_cols, n_components=1, contamination=0.05, 
     result['IsAnomaly'] = anomalies.astype(int)
     return result, threshold, pca, scaler, X_train_scaled
 
-def simula_dados_normais(df, numeric_cols, n_samples=300, random_state=42):
+def simula_dados_normais(df, numeric_cols, n_samples=300, random_state=37):
     X = df[numeric_cols].values
     mean = X.mean(axis=0)
     cov = np.cov(X, rowvar=False)
